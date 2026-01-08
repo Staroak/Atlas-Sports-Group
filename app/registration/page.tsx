@@ -9,8 +9,11 @@ import Container from "@/app/components/layout/Container";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/app/components/ui/card";
 import { Badge } from "@/app/components/ui/badge";
+import { Suspense } from "react";
+import { getDefaultClassNames } from "react-day-picker";
 
-export default function RegistrationPage() {
+
+function RegistrationContent() {
   const searchParams = useSearchParams();
 
   // Handle auto-scroll when URL has hash or program query param
@@ -206,5 +209,13 @@ export default function RegistrationPage() {
         </Container>
       </section>
     </div>
+  );
+}
+
+export default function RegistrationPage(){
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}> 
+      <RegistrationContent />
+    </Suspense>
   );
 }
