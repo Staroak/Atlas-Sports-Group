@@ -99,10 +99,13 @@ export default function Hero() {
             </p>
           </div>
 
-          {/* CTA Button */}
-          <div className="pt-2 animate-fadeIn">
+          {/* CTA Buttons */}
+          <div className="pt-2 animate-fadeIn flex flex-col sm:flex-row items-center gap-3">
             <Button asChild variant="cta" size="lg" className="shadow-2xl hover:shadow-green-500/25">
               <Link href="/programs">Explore Programs</Link>
+            </Button>
+            <Button asChild variant="outline" size="lg" className="bg-white/80 hover:bg-white border-atlas-navy/20 text-atlas-navy">
+              <Link href="/updates">New Updates</Link>
             </Button>
           </div>
         </div>

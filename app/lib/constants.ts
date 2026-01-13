@@ -7,6 +7,7 @@ export const SITE_TAGLINE = "Building Healthy Habits Through Sport";
 export const NAV_LINKS = [
   { label: "Home", href: "/" },
   { label: "Programs", href: "/programs" },
+  { label: "Updates", href: "/updates" },
   { label: "About", href: "/about" },
   { label: "Policies", href: "/policies" },
 ];
