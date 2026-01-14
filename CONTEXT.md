@@ -288,3 +288,27 @@ Created `.claude/skills/generate-program-page.md` documenting the program page g
 - **Current events**: Blue highlighting for today and future dates
 - **Date range display**: Multi-day events show "Jan 15 - Jan 21" format
 - **Program links**: Events with linked programs show clickable "View [Program]" link
+
+---
+
+## Architecture: When To Add More Structure
+
+Current structure follows Next.js App Router best practices:
+- `lib/queries/` → Server-only reads (pure functions)
+- `lib/actions/` → Server-only writes (side effects via Server Actions)
+- `"use client"` / `"use server"` directives enforce boundaries at build time
+
+**Add a `services/` or `controllers/` layer when you have:**
+
+| Scenario | Example | Solution |
+|----------|---------|----------|
+| Business logic reused in multiple places | Calculating registration fees used in checkout + admin preview | `lib/services/registration.ts` |
+| Complex multi-step operations | Creating a program also creates default events and sends email | `lib/services/programSetup.ts` |
+| External API integrations | Stripe, SendGrid, etc. | `lib/services/stripe.ts` |
+
+**Current flow is correct for CRUD apps:**
+```
+Form → Server Action → Supabase → revalidatePath()
+```
+
+Server Actions ARE your controllers — no extra layer needed until complexity demands it.
