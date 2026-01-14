@@ -181,13 +181,13 @@ export function AnnouncementForm({ announcement, programs }: AnnouncementFormPro
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="program_id">Related Program (optional)</Label>
-                <Select value={programId} onValueChange={setProgramId}>
+                <Select value={programId || 'none'} onValueChange={(val) => setProgramId(val === 'none' ? '' : val)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a program" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No program</SelectItem>
-                    {programs.map((program) => (
+                    <SelectItem value="none">No program</SelectItem>
+                    {programs.filter(p => p.id).map((program) => (
                       <SelectItem key={program.id} value={program.id}>
                         {program.name}
                       </SelectItem>

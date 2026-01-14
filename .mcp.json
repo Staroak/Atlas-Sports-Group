@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "quint-code": {
+      "command": "S:\\.local\\bin\\quint-code",
+      "args": [
+        "serve"
+      ],
+      "cwd": "C:\\AtlasSportsSite\\atlas-sports-landing",
+      "env": {
+        "QUINT_PROJECT_ROOT": "C:\\AtlasSportsSite\\atlas-sports-landing"
+      }
+    }
+  }
+}

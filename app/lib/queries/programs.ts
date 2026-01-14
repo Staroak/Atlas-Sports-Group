@@ -101,3 +101,25 @@ export async function getProgramById(id: string): Promise<Program | null> {
 
   return data
 }
+
+// Get all published program slugs for static generation
+export async function getPublishedProgramSlugs(): Promise<string[]> {
+  try {
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase
+      .from('programs')
+      .select('slug')
+      .eq('is_published', true) as any)
+
+    if (error || !data?.length) {
+      // Fallback to constants
+      return FALLBACK_PROGRAMS.map((p) => p.slug)
+    }
+
+    return (data as { slug: string }[]).map((p) => p.slug)
+  } catch (error) {
+    console.error('Database error, using fallback slugs:', error)
+    return FALLBACK_PROGRAMS.map((p) => p.slug)
+  }
+}

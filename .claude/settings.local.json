@@ -3,7 +3,10 @@
     "allow": [
       "Bash(npm run build:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(if exist \"%USERPROFILE%\\\\.claude\\\\settings.json\" type \"%USERPROFILE%\\\\.claude\\\\settings.json\")",
+      "Bash(findstr:*)",
+      "Bash(powershell -Command:*)"
     ]
   }
 }

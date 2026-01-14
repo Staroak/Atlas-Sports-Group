@@ -1,7 +1,6 @@
 'use client'
 
 import { useActionState, useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
@@ -10,13 +9,19 @@ import { Switch } from '@/app/components/ui/switch'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs'
 import { ArrayFieldEditor } from '../components/ArrayFieldEditor'
+import { ImageUpload } from '../components/ImageUpload'
 import { createProgram, updateProgram, type ProgramFormState } from '@/app/lib/actions/programs'
 import type { Program } from '@/app/lib/types/database'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, AlertCircle } from 'lucide-react'
 import Link from 'next/link'
 
 interface ProgramFormProps {
   program?: Program
+}
+
+interface FieldErrors {
+  name?: string
+  slug?: string
 }
 
 function generateSlug(name: string): string {
@@ -27,7 +32,6 @@ function generateSlug(name: string): string {
 }
 
 export function ProgramForm({ program }: ProgramFormProps) {
-  const router = useRouter()
   const isEditing = !!program
 
   const [name, setName] = useState(program?.name || '')
@@ -40,10 +44,15 @@ export function ProgramForm({ program }: ProgramFormProps) {
   const [schedule, setSchedule] = useState(program?.schedule || '')
   const [displayOrder, setDisplayOrder] = useState(program?.display_order || 0)
   const [isPublished, setIsPublished] = useState(program?.is_published || false)
-  const [features, setFeatures] = useState<string[]>(program?.features || [])
-  const [benefits, setBenefits] = useState<string[]>(program?.benefits || [])
-  const [whatYoullLearn, setWhatYoullLearn] = useState<string[]>(program?.what_youll_learn || [])
-  const [whatToBring, setWhatToBring] = useState<string[]>(program?.what_to_bring || [])
+  const [features, setFeatures] = useState<string[]>(Array.isArray(program?.features) ? program.features.filter(Boolean) : [])
+  const [benefits, setBenefits] = useState<string[]>(Array.isArray(program?.benefits) ? program.benefits.filter(Boolean) : [])
+  const [whatYoullLearn, setWhatYoullLearn] = useState<string[]>(Array.isArray(program?.what_youll_learn) ? program.what_youll_learn.filter(Boolean) : [])
+  const [whatToBring, setWhatToBring] = useState<string[]>(Array.isArray(program?.what_to_bring) ? program.what_to_bring.filter(Boolean) : [])
+
+  // Validation state
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [showAllErrors, setShowAllErrors] = useState(false)
 
   const initialState: ProgramFormState = {}
 
@@ -60,8 +69,75 @@ export function ProgramForm({ program }: ProgramFormProps) {
     }
   }, [name, isEditing])
 
+  // Validate fields
+  const validateField = (fieldName: string, value: string) => {
+    const errors: FieldErrors = { ...fieldErrors }
+
+    switch (fieldName) {
+      case 'name':
+        if (!value.trim()) {
+          errors.name = 'Program name is required'
+        } else {
+          delete errors.name
+        }
+        break
+      case 'slug':
+        if (!value.trim()) {
+          errors.slug = 'URL slug is required'
+        } else if (!/^[a-z0-9-]+$/.test(value)) {
+          errors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens'
+        } else {
+          delete errors.slug
+        }
+        break
+    }
+
+    setFieldErrors(errors)
+    return errors
+  }
+
+  // Handle blur to mark field as touched
+  const handleBlur = (fieldName: string, value: string) => {
+    setTouched({ ...touched, [fieldName]: true })
+    validateField(fieldName, value)
+  }
+
+  // Check if form is valid
+  const isFormValid = () => {
+    const errors: FieldErrors = {}
+    if (!name.trim()) errors.name = 'Program name is required'
+    if (!slug.trim()) errors.slug = 'URL slug is required'
+    return Object.keys(errors).length === 0
+  }
+
+  // Handle form submission with validation
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    // Validate all required fields
+    const errors: FieldErrors = {}
+    if (!name.trim()) errors.name = 'Program name is required'
+    if (!slug.trim()) errors.slug = 'URL slug is required'
+    else if (!/^[a-z0-9-]+$/.test(slug)) errors.slug = 'Slug can only contain lowercase letters, numbers, and hyphens'
+
+    if (Object.keys(errors).length > 0) {
+      e.preventDefault()
+      setFieldErrors(errors)
+      setShowAllErrors(true)
+      // Scroll to top to show error message
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+  }
+
+  // Get error for a field (only show if touched or showAllErrors)
+  const getFieldError = (fieldName: keyof FieldErrors) => {
+    if (showAllErrors || touched[fieldName]) {
+      return fieldErrors[fieldName]
+    }
+    return undefined
+  }
+
   return (
-    <form action={formAction}>
+    <form action={formAction} onSubmit={handleSubmit}>
       <div className="flex items-center gap-4 mb-6">
         <Link href="/admin/programs">
           <Button type="button" variant="ghost" size="sm">
@@ -86,12 +162,42 @@ export function ProgramForm({ program }: ProgramFormProps) {
         </div>
       </div>
 
-      {state.error && (
-        <div className="bg-red-50 text-red-600 p-4 rounded-md mb-6">
-          {state.error}
+      {/* Validation Error Summary */}
+      {showAllErrors && Object.keys(fieldErrors).length > 0 && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-6">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="font-medium">Please fix the following issues:</p>
+              <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
+                {fieldErrors.name && <li>{fieldErrors.name}</li>}
+                {fieldErrors.slug && <li>{fieldErrors.slug}</li>}
+              </ul>
+            </div>
+          </div>
         </div>
       )}
 
+      {/* Server Error */}
+      {state.error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-md mb-6">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span>{state.error}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden inputs to ensure all fields are submitted regardless of active tab */}
+      <input type="hidden" name="name" value={name} />
+      <input type="hidden" name="slug" value={slug} />
+      <input type="hidden" name="tagline" value={tagline} />
+      <input type="hidden" name="description" value={description} />
+      <input type="hidden" name="logo_url" value={logoUrl} />
+      <input type="hidden" name="youth_ages" value={youthAges} />
+      <input type="hidden" name="adult_ages" value={adultAges} />
+      <input type="hidden" name="schedule" value={schedule} />
+      <input type="hidden" name="display_order" value={String(displayOrder)} />
       <input type="hidden" name="is_published" value={String(isPublished)} />
       <input type="hidden" name="features" value={JSON.stringify(features)} />
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
@@ -113,29 +219,48 @@ export function ProgramForm({ program }: ProgramFormProps) {
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Program Name *</Label>
+                  <Label htmlFor="name" className={getFieldError('name') ? 'text-red-600' : ''}>
+                    Program Name *
+                  </Label>
                   <Input
                     id="name"
                     name="name"
                     value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value)
+                      if (touched.name) validateField('name', e.target.value)
+                    }}
+                    onBlur={(e) => handleBlur('name', e.target.value)}
                     placeholder="e.g., Skyhawks Flag Football"
-                    required
+                    className={getFieldError('name') ? 'border-red-500 focus-visible:ring-red-500' : ''}
                   />
+                  {getFieldError('name') && (
+                    <p className="text-sm text-red-600">{getFieldError('name')}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="slug">URL Slug *</Label>
+                  <Label htmlFor="slug" className={getFieldError('slug') ? 'text-red-600' : ''}>
+                    URL Slug *
+                  </Label>
                   <Input
                     id="slug"
                     name="slug"
                     value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
+                    onChange={(e) => {
+                      setSlug(e.target.value)
+                      if (touched.slug) validateField('slug', e.target.value)
+                    }}
+                    onBlur={(e) => handleBlur('slug', e.target.value)}
                     placeholder="e.g., skyhawks-flag-football"
-                    required
+                    className={getFieldError('slug') ? 'border-red-500 focus-visible:ring-red-500' : ''}
                   />
-                  <p className="text-xs text-gray-500">
-                    Will be used in URL: /programs/{slug || 'your-slug'}
-                  </p>
+                  {getFieldError('slug') ? (
+                    <p className="text-sm text-red-600">{getFieldError('slug')}</p>
+                  ) : (
+                    <p className="text-xs text-gray-500">
+                      Will be used in URL: /programs/{slug || 'your-slug'}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -162,34 +287,28 @@ export function ProgramForm({ program }: ProgramFormProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="logo_url">Logo URL</Label>
-                  <Input
-                    id="logo_url"
-                    name="logo_url"
-                    value={logoUrl}
-                    onChange={(e) => setLogoUrl(e.target.value)}
-                    placeholder="/logos/program-logo.png"
-                  />
-                  <p className="text-xs text-gray-500">
-                    Path to logo image in /public folder
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="display_order">Display Order</Label>
-                  <Input
-                    id="display_order"
-                    name="display_order"
-                    type="number"
-                    value={displayOrder}
-                    onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10))}
-                    min={0}
-                  />
-                  <p className="text-xs text-gray-500">
-                    Lower numbers appear first
-                  </p>
-                </div>
+              <ImageUpload
+                id="logo_url"
+                name="logo_url"
+                label="Logo"
+                value={logoUrl}
+                onChange={setLogoUrl}
+                helpText="Upload an image or paste a URL"
+              />
+
+              <div className="space-y-2">
+                <Label htmlFor="display_order">Display Order</Label>
+                <Input
+                  id="display_order"
+                  name="display_order"
+                  type="number"
+                  value={displayOrder}
+                  onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10))}
+                  min={0}
+                />
+                <p className="text-xs text-gray-500">
+                  Lower numbers appear first
+                </p>
               </div>
             </CardContent>
           </Card>

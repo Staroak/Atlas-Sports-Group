@@ -6,6 +6,15 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import type { ProgramInsert, ProgramUpdate } from '@/app/lib/types/database'
 
+// Helper to clean array fields - filters out null/undefined/empty values
+const cleanStringArray = z.preprocess(
+  (val) => {
+    if (!Array.isArray(val)) return []
+    return val.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+  },
+  z.array(z.string())
+)
+
 const ProgramSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   slug: z.string().min(1, 'Slug is required'),
@@ -14,10 +23,10 @@ const ProgramSchema = z.object({
   logo_url: z.string().optional().nullable(),
   youth_ages: z.string().optional().nullable(),
   adult_ages: z.string().optional().nullable(),
-  features: z.array(z.string()).default([]),
-  benefits: z.array(z.string()).default([]),
-  what_youll_learn: z.array(z.string()).default([]),
-  what_to_bring: z.array(z.string()).default([]),
+  features: cleanStringArray,
+  benefits: cleanStringArray,
+  what_youll_learn: cleanStringArray,
+  what_to_bring: cleanStringArray,
   schedule: z.string().optional().nullable(),
   display_order: z.number().default(0),
   is_published: z.boolean().default(false),
@@ -34,6 +43,16 @@ export async function createProgram(
 ): Promise<ProgramFormState> {
   const supabase = await createClient()
 
+  // Helper to safely parse JSON arrays, filtering out nulls
+  const parseJsonArray = (value: FormDataEntryValue | null): unknown[] => {
+    try {
+      const parsed = JSON.parse((value as string) || '[]')
+      return Array.isArray(parsed) ? parsed.filter((item) => item != null) : []
+    } catch {
+      return []
+    }
+  }
+
   try {
     const rawData = {
       name: formData.get('name') as string,
@@ -43,10 +62,10 @@ export async function createProgram(
       logo_url: formData.get('logo_url') as string || null,
       youth_ages: formData.get('youth_ages') as string || null,
       adult_ages: formData.get('adult_ages') as string || null,
-      features: JSON.parse(formData.get('features') as string || '[]'),
-      benefits: JSON.parse(formData.get('benefits') as string || '[]'),
-      what_youll_learn: JSON.parse(formData.get('what_youll_learn') as string || '[]'),
-      what_to_bring: JSON.parse(formData.get('what_to_bring') as string || '[]'),
+      features: parseJsonArray(formData.get('features')),
+      benefits: parseJsonArray(formData.get('benefits')),
+      what_youll_learn: parseJsonArray(formData.get('what_youll_learn')),
+      what_to_bring: parseJsonArray(formData.get('what_to_bring')),
       schedule: formData.get('schedule') as string || null,
       display_order: parseInt(formData.get('display_order') as string || '0', 10),
       is_published: formData.get('is_published') === 'true',
@@ -82,6 +101,16 @@ export async function updateProgram(
 ): Promise<ProgramFormState> {
   const supabase = await createClient()
 
+  // Helper to safely parse JSON arrays, filtering out nulls
+  const parseJsonArray = (value: FormDataEntryValue | null): unknown[] => {
+    try {
+      const parsed = JSON.parse((value as string) || '[]')
+      return Array.isArray(parsed) ? parsed.filter((item) => item != null) : []
+    } catch {
+      return []
+    }
+  }
+
   try {
     const rawData = {
       name: formData.get('name') as string,
@@ -91,10 +120,10 @@ export async function updateProgram(
       logo_url: formData.get('logo_url') as string || null,
       youth_ages: formData.get('youth_ages') as string || null,
       adult_ages: formData.get('adult_ages') as string || null,
-      features: JSON.parse(formData.get('features') as string || '[]'),
-      benefits: JSON.parse(formData.get('benefits') as string || '[]'),
-      what_youll_learn: JSON.parse(formData.get('what_youll_learn') as string || '[]'),
-      what_to_bring: JSON.parse(formData.get('what_to_bring') as string || '[]'),
+      features: parseJsonArray(formData.get('features')),
+      benefits: parseJsonArray(formData.get('benefits')),
+      what_youll_learn: parseJsonArray(formData.get('what_youll_learn')),
+      what_to_bring: parseJsonArray(formData.get('what_to_bring')),
       schedule: formData.get('schedule') as string || null,
       display_order: parseInt(formData.get('display_order') as string || '0', 10),
       is_published: formData.get('is_published') === 'true',

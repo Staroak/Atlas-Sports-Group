@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { PROGRAMS } from "@/app/lib/constants";
+import { getProgramBySlug, getPublishedProgramSlugs } from "@/app/lib/queries/programs";
 import Container from "@/app/components/layout/Container";
 import { Button } from "@/app/components/ui/button";
 import { Card, CardContent } from "@/app/components/ui/card";
@@ -12,14 +12,13 @@ interface ProgramPageProps {
 }
 
 export async function generateStaticParams() {
-  return PROGRAMS.map((program) => ({
-    slug: program.slug,
-  }));
+  const slugs = await getPublishedProgramSlugs();
+  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: ProgramPageProps) {
   const { slug } = await params;
-  const program = PROGRAMS.find((p) => p.slug === slug);
+  const program = await getProgramBySlug(slug);
 
   if (!program) {
     return { title: "Program Not Found" };
@@ -33,7 +32,7 @@ export async function generateMetadata({ params }: ProgramPageProps) {
 
 export default async function ProgramPage({ params }: ProgramPageProps) {
   const { slug } = await params;
-  const program = PROGRAMS.find((p) => p.slug === slug);
+  const program = await getProgramBySlug(slug);
 
   if (!program) {
     notFound();
