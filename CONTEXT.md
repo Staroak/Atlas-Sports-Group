@@ -111,10 +111,21 @@ app/admin/
 ### 8. Events Calendar Component
 
 `app/components/EventsCalendar.tsx`:
-- Calendar view with date selection
-- Highlights dates with events
-- Shows event details when date is selected
+- Calendar view with date selection (50% larger cells for visibility)
+- **Multi-day event support**: Events spanning multiple days highlight all days in range
+- **Past event styling**: Past days of ongoing events shown in grey, current/future in blue
+- Shows event details when date is selected (title, time, location, description)
+- **Program linking**: Events linked to a program show a "View [Program Name]" hyperlink
 - Lists upcoming events for current month
+- Supports events that overlap month boundaries
+
+**Key helper functions:**
+- `isDateInEventRange()` - Checks if a date falls within an event's start/end range
+- `getEventDateRange()` - Returns all dates for an event (for calendar highlighting)
+
+**Event query** (`app/lib/queries/events.ts`):
+- Fetches events where `start_date >= today` OR `end_date >= today` (includes ongoing multi-day events)
+- Joins program data (name, slug) for hyperlinking
 
 ### 9. Route Protection
 
@@ -149,6 +160,8 @@ app/admin/
 | Next.js Image with Supabase | Add `*.supabase.co` to `next.config.ts` remotePatterns |
 | **Form fields null on tab switch** | Tabs unmount inactive content. Add hidden inputs for ALL form fields to ensure submission regardless of active tab (ProgramForm.tsx lines 191-205) |
 | **JSONB array null validation** | Use `z.preprocess` to convert null arrays to `[]` and filter null items. Also add `parseJsonArray` helper in server actions |
+| **Multi-day events only showing first day** | Use `.or()` filter in Supabase query to check both `start_date` and `end_date`. Calendar component needs `eachDayOfInterval()` to generate all dates in range |
+| **Windows reserved filename `nul`** | Use Git Bash `rm` command to delete - PowerShell can't handle Windows reserved names |
 
 ## Supabase Setup (User Tasks)
 
@@ -201,7 +214,7 @@ next.config.ts                # Supabase image domains
 - [x] Programs appear on /registration page dynamically
 - [x] Program "learn more" pages work (/programs/[slug])
 - [x] Events appear on calendar
-- [ ] Events CRUD works
+- [x] Events CRUD works
 - [ ] Announcements CRUD works
 - [ ] Settings can be updated
 
@@ -239,3 +252,39 @@ All pages have fallback to `PROGRAMS` constant if database unavailable.
 ### Skill Documentation
 
 Created `.claude/skills/generate-program-page.md` documenting the program page generation workflow.
+
+---
+
+## Session: Jan 13, 2026 - Events Calendar Enhancements
+
+### Multi-Day Event Support
+
+**Problem:** Events with duration (e.g., 1 week) only displayed on the first day.
+
+**Root Cause:**
+- Calendar only checked `start_date` when filtering/highlighting
+- Query filtered out events where `start_date < today` (missing ongoing events)
+
+**Solution:**
+1. Updated `getPublishedEvents()` query to use `.or()` filter:
+   ```typescript
+   .or(`start_date.gte.${today},end_date.gte.${today}`)
+   ```
+2. Added helper functions in `EventsCalendar.tsx`:
+   - `isDateInEventRange()` - checks if date falls within event range
+   - `getEventDateRange()` - returns all dates using `eachDayOfInterval()`
+3. Calendar modifiers now separate past vs current dates for styling
+
+**Files Modified:**
+- `app/lib/queries/events.ts` - Updated query, added `EventWithProgram` type
+- `app/components/EventsCalendar.tsx` - Multi-day support, program links, styling
+- `app/components/ui/calendar.tsx` - Increased cell size (spacing 8 → 12)
+
+### Calendar UI Improvements
+
+- **Size**: 50% larger cells (`--cell-size: spacing(12)`)
+- **Card**: Minimum width 400px, larger padding and text
+- **Past events**: Grey styling for dates that have passed
+- **Current events**: Blue highlighting for today and future dates
+- **Date range display**: Multi-day events show "Jan 15 - Jan 21" format
+- **Program links**: Events with linked programs show clickable "View [Program]" link

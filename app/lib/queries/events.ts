@@ -1,15 +1,25 @@
 import { createClient } from '@/app/lib/supabase/server'
 import type { Event } from '@/app/lib/types/database'
 
-export async function getPublishedEvents(): Promise<Event[]> {
+// Event with optional program info for linking
+export type EventWithProgram = Event & {
+  programs?: { name: string; slug: string } | null
+}
+
+export async function getPublishedEvents(): Promise<EventWithProgram[]> {
   try {
     const supabase = await createClient()
+    const today = new Date().toISOString().split('T')[0]
 
+    // Get events where:
+    // 1. start_date is today or in the future, OR
+    // 2. end_date is today or in the future (ongoing multi-day events)
+    // Join program data for linking
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select('*, programs(name, slug)')
       .eq('is_published', true)
-      .gte('start_date', new Date().toISOString().split('T')[0])
+      .or(`start_date.gte.${today},end_date.gte.${today}`)
       .order('start_date', { ascending: true })
 
     if (error) {
@@ -17,7 +27,7 @@ export async function getPublishedEvents(): Promise<Event[]> {
       return []
     }
 
-    return data || []
+    return (data || []) as EventWithProgram[]
   } catch (error) {
     console.error('Database error:', error)
     return []
@@ -27,13 +37,14 @@ export async function getPublishedEvents(): Promise<Event[]> {
 export async function getFeaturedEvents(): Promise<Event[]> {
   try {
     const supabase = await createClient()
+    const today = new Date().toISOString().split('T')[0]
 
     const { data, error } = await supabase
       .from('events')
       .select('*')
       .eq('is_published', true)
       .eq('is_featured', true)
-      .gte('start_date', new Date().toISOString().split('T')[0])
+      .or(`start_date.gte.${today},end_date.gte.${today}`)
       .order('start_date', { ascending: true })
       .limit(3)
 
@@ -50,16 +61,12 @@ export async function getFeaturedEvents(): Promise<Event[]> {
 }
 
 // Admin queries - returns events with optional program join
-export type EventWithProgram = Event & {
-  programs?: { name: string } | null
-}
-
 export async function getAllEvents(): Promise<EventWithProgram[]> {
   const supabase = await createClient()
 
   const { data, error } = await supabase
     .from('events')
-    .select('*, programs(name)')
+    .select('*, programs(name, slug)')
     .order('start_date', { ascending: false })
 
   if (error) {

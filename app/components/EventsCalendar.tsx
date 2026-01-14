@@ -1,35 +1,68 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { Calendar } from '@/app/components/ui/calendar'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card'
 import { Badge } from '@/app/components/ui/badge'
-import { format, isSameDay, isSameMonth } from 'date-fns'
-import { CalendarDays, MapPin, Clock } from 'lucide-react'
-import type { Event } from '@/app/lib/types/database'
+import { format, isSameDay, isSameMonth, eachDayOfInterval, isWithinInterval, isBefore, startOfDay } from 'date-fns'
+import { CalendarDays, MapPin, Clock, ExternalLink } from 'lucide-react'
+import type { EventWithProgram } from '@/app/lib/queries/events'
 
 interface EventsCalendarProps {
-  events: Event[]
+  events: EventWithProgram[]
+}
+
+// Check if a date falls within an event's date range
+function isDateInEventRange(date: Date, event: EventWithProgram): boolean {
+  const start = new Date(event.start_date)
+  const end = event.end_date ? new Date(event.end_date) : start
+  // Set times to midnight for accurate date comparison
+  start.setHours(0, 0, 0, 0)
+  end.setHours(23, 59, 59, 999)
+  const checkDate = new Date(date)
+  checkDate.setHours(12, 0, 0, 0)
+  return isWithinInterval(checkDate, { start, end })
+}
+
+// Get all dates for an event (for calendar highlighting)
+function getEventDateRange(event: EventWithProgram): Date[] {
+  const start = new Date(event.start_date)
+  const end = event.end_date ? new Date(event.end_date) : start
+  return eachDayOfInterval({ start, end })
 }
 
 export default function EventsCalendar({ events }: EventsCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date())
 
-  // Get events for the selected date
+  // Get events for the selected date (checks full date range)
   const selectedDateEvents = selectedDate
-    ? events.filter((event) => isSameDay(new Date(event.start_date), selectedDate))
+    ? events.filter((event) => isDateInEventRange(selectedDate, event))
     : []
 
-  // Get all dates that have events for highlighting
-  const eventDates = events.map((event) => new Date(event.start_date))
+  // Get all dates that have events for highlighting (includes full range)
+  const today = startOfDay(new Date())
+  const eventDates = events.flatMap((event) => getEventDateRange(event))
 
-  // Get events for current month view
-  const monthEvents = events.filter((event) =>
-    isSameMonth(new Date(event.start_date), currentMonth)
-  )
+  // Separate past event dates from current/future event dates
+  const pastEventDates = eventDates.filter((date) => isBefore(date, today))
+  const currentEventDates = eventDates.filter((date) => !isBefore(date, today))
 
-  const formatEventTime = (event: Event) => {
+  // Get events for current month view (includes events that overlap with month)
+  const monthEvents = events.filter((event) => {
+    const start = new Date(event.start_date)
+    const end = event.end_date ? new Date(event.end_date) : start
+    const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
+    const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0)
+    return (
+      isSameMonth(start, currentMonth) ||
+      isSameMonth(end, currentMonth) ||
+      (start < monthStart && end > monthEnd)
+    )
+  })
+
+  const formatEventTime = (event: EventWithProgram) => {
     if (event.is_all_day) return 'All Day'
     if (event.start_time) {
       const [hours, minutes] = event.start_time.split(':')
@@ -41,17 +74,17 @@ export default function EventsCalendar({ events }: EventsCalendarProps) {
   }
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50">
-        <CardTitle className="text-xl text-atlas-navy flex items-center gap-2">
-          <CalendarDays className="w-5 h-5" />
+    <Card className="overflow-hidden w-full min-w-[400px]">
+      <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 p-6">
+        <CardTitle className="text-2xl text-atlas-navy flex items-center gap-2">
+          <CalendarDays className="w-6 h-6" />
           Upcoming Events
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-base">
           View scheduled events and activities
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="p-6">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -60,10 +93,12 @@ export default function EventsCalendar({ events }: EventsCalendarProps) {
           onMonthChange={setCurrentMonth}
           className="rounded-md border w-full"
           modifiers={{
-            hasEvent: eventDates,
+            hasEvent: currentEventDates,
+            pastEvent: pastEventDates,
           }}
           modifiersClassNames={{
             hasEvent: 'bg-blue-100 text-blue-700 font-semibold',
+            pastEvent: 'bg-gray-100 text-gray-400',
           }}
         />
 
@@ -91,6 +126,14 @@ export default function EventsCalendar({ events }: EventsCalendarProps) {
                     )}
                   </div>
 
+                  {/* Show date range for multi-day events */}
+                  {event.end_date && event.end_date !== event.start_date && (
+                    <div className="flex items-center gap-1 mt-1 text-xs text-neutral-600">
+                      <CalendarDays className="w-3 h-3" />
+                      {format(new Date(event.start_date), 'MMM d')} - {format(new Date(event.end_date), 'MMM d')}
+                    </div>
+                  )}
+
                   {event.start_time && (
                     <div className="flex items-center gap-1 mt-1 text-xs text-neutral-600">
                       <Clock className="w-3 h-3" />
@@ -109,6 +152,17 @@ export default function EventsCalendar({ events }: EventsCalendarProps) {
                     <p className="text-xs text-neutral-500 mt-2 line-clamp-2">
                       {event.description}
                     </p>
+                  )}
+
+                  {/* Link to program if event has one */}
+                  {event.programs?.slug && (
+                    <Link
+                      href={`/programs/${event.programs.slug}`}
+                      className="inline-flex items-center gap-1 mt-3 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                      View {event.programs.name}
+                    </Link>
                   )}
                 </div>
               ))}
