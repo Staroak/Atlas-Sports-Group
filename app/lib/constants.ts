@@ -9,7 +9,6 @@ export const NAV_LINKS = [
   { label: "Programs", href: "/programs" },
   { label: "Updates", href: "/updates" },
   { label: "About", href: "/about" },
-  { label: "Policies", href: "/policies" },
 ];
 
 // Program dropdown for footer or other uses
@@ -301,5 +300,6 @@ export const REGISTRATION_STATUS = {
 // Contact Information (for future use)
 export const CONTACT_INFO = {
   email: "info@atlassportsgroup.com",
-  serviceArea: "Serving the Tri-Cities: Port Moody, Coquitlam, Port Coquitlam",
+  phone: "",
+  address: "",
 };

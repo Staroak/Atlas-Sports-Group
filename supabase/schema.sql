@@ -22,6 +22,8 @@ CREATE TABLE programs (
   schedule VARCHAR(500),
   display_order INTEGER DEFAULT 0,
   is_published BOOLEAN DEFAULT false,
+  registration_open BOOLEAN DEFAULT false,
+  registration_message VARCHAR(500),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );

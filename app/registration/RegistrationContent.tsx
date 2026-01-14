@@ -20,20 +20,15 @@ interface Program {
   adultAges?: string;
   features: string[];
   schedule: string;
-}
-
-interface RegistrationStatus {
-  isOpen: boolean;
-  openDate: string;
-  message: string;
+  registrationOpen?: boolean;
+  registrationMessage?: string;
 }
 
 interface RegistrationContentProps {
   programs: Program[];
-  registrationStatus: RegistrationStatus;
 }
 
-export function RegistrationContent({ programs, registrationStatus }: RegistrationContentProps) {
+export function RegistrationContent({ programs }: RegistrationContentProps) {
   const searchParams = useSearchParams();
 
   // Handle auto-scroll when URL has hash or program query param
@@ -53,6 +48,9 @@ export function RegistrationContent({ programs, registrationStatus }: Registrati
     }
   }, [searchParams]);
 
+  // Check if any program has registration open
+  const anyRegistrationOpen = programs.some(p => p.registrationOpen);
+
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
@@ -65,10 +63,10 @@ export function RegistrationContent({ programs, registrationStatus }: Registrati
             <p className="text-xl text-white/90 mb-6 max-w-2xl mx-auto">
               Choose your program below and register for the upcoming season
             </p>
-            {!registrationStatus.isOpen && (
+            {!anyRegistrationOpen && (
               <div className="inline-block bg-white/20 backdrop-blur-sm rounded-lg px-6 py-3">
                 <p className="text-white font-medium">
-                  {registrationStatus.message}
+                  Registration is currently closed. Check back soon!
                 </p>
               </div>
             )}
@@ -193,7 +191,7 @@ export function RegistrationContent({ programs, registrationStatus }: Registrati
                           Register for {program.name.split(' ')[0]}
                         </h3>
 
-                        {registrationStatus.isOpen ? (
+                        {program.registrationOpen ? (
                           <>
                             <p className="text-gray-600 mb-6 text-sm">
                               Spots are limited! Secure your place today.
@@ -208,7 +206,7 @@ export function RegistrationContent({ programs, registrationStatus }: Registrati
                         ) : (
                           <>
                             <p className="text-gray-600 mb-6 text-sm">
-                              Registration opens {registrationStatus.openDate}
+                              {program.registrationMessage || 'Registration coming soon'}
                             </p>
                             <Button variant="atlas" size="lg" className="w-full mb-4">
                               Get Notified

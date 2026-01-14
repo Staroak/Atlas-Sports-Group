@@ -215,8 +215,8 @@ next.config.ts                # Supabase image domains
 - [x] Program "learn more" pages work (/programs/[slug])
 - [x] Events appear on calendar
 - [x] Events CRUD works
-- [ ] Announcements CRUD works
-- [ ] Settings can be updated
+- [x] Announcements CRUD works
+- [x] Settings can be updated
 
 ---
 

@@ -18,6 +18,8 @@ function dbProgramToLegacy(program: Program) {
     whatYoullLearn: program.what_youll_learn || [],
     whatToBring: program.what_to_bring || [],
     schedule: program.schedule || '',
+    registrationOpen: (program as any).registration_open || false,
+    registrationMessage: (program as any).registration_message || '',
   }
 }
 

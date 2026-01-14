@@ -9,7 +9,8 @@ export interface RegistrationStatus {
 
 export interface ContactInfo {
   email: string
-  serviceArea: string
+  phone: string
+  address: string
 }
 
 export async function getRegistrationStatus(): Promise<RegistrationStatus> {

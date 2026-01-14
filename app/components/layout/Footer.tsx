@@ -1,15 +1,39 @@
 "use client";
 
-import React from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { SITE_NAME, NAV_LINKS, PROGRAM_LINKS, CONTACT_INFO } from "@/app/lib/constants";
+import { SITE_NAME, NAV_LINKS, CONTACT_INFO } from "@/app/lib/constants";
+import { createClient } from "@/app/lib/supabase/client";
 import Container from "./Container";
 
 export default function Footer() {
   const pathname = usePathname();
   const currentYear = new Date().getFullYear();
+  const [contactInfo, setContactInfo] = useState(CONTACT_INFO);
+
+  // Fetch contact info from database
+  useEffect(() => {
+    async function loadContactInfo() {
+      try {
+        const supabase = createClient();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data } = await (supabase as any)
+          .from('site_settings')
+          .select('value')
+          .eq('key', 'contact_info')
+          .single();
+
+        if (data?.value) {
+          setContactInfo(data.value);
+        }
+      } catch {
+        // Use fallback from constants
+      }
+    }
+    loadContactInfo();
+  }, []);
 
   // Hide footer on homepage
   if (pathname === "/") {
@@ -35,9 +59,11 @@ export default function Footer() {
             <p className="text-sm text-neutral-200">
               Building healthy habits through sport. Serving the Tri-Cities community with quality youth and adult sports programs.
             </p>
-            <p className="text-xs text-neutral-300">
-              {CONTACT_INFO.serviceArea}
-            </p>
+            {contactInfo.address && (
+              <p className="text-xs text-neutral-300">
+                🏠︎ {contactInfo.address}
+              </p>
+            )}
           </div>
 
           {/* Quick Links Column */}
@@ -57,20 +83,38 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Programs Column */}
+          {/* Contact Column */}
           <div>
-            <h3 className="font-semibold text-lg mb-4 font-heading">Our Programs</h3>
-            <ul className="space-y-2">
-              {PROGRAM_LINKS.map((program) => (
-                <li key={program.href}>
-                  <Link
-                    href={program.href}
-                    className="text-sm text-neutral-200 hover:text-atlas-sky transition-colors"
+            <h3 className="font-semibold text-lg mb-4 font-heading">Contact Us</h3>
+            <ul className="space-y-3">
+              {contactInfo.email && (
+                <li>
+                  <a
+                    href={`mailto:${contactInfo.email}`}
+                    className="text-sm text-neutral-200 hover:text-atlas-sky transition-colors flex items-center gap-2"
                   >
-                    {program.label}
-                  </Link>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    {contactInfo.email}
+                  </a>
                 </li>
-              ))}
+              )}
+              {contactInfo.phone && (
+                <li>
+                  <a
+                    href={`tel:${contactInfo.phone.replace(/\D/g, '')}`}
+                    className="text-sm text-neutral-200 hover:text-atlas-sky transition-colors flex items-center gap-2"
+                  >
+                    ☏ {contactInfo.phone}
+                  </a>
+                </li>
+              )}
+              {contactInfo.address && (
+                <li className="text-sm text-neutral-200 flex items-start gap-2">
+                  🏠︎ {contactInfo.address}
+                </li>
+              )}
             </ul>
           </div>
         </div>
