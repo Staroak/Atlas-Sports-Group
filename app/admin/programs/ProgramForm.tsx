@@ -294,23 +294,8 @@ export function ProgramForm({ program }: ProgramFormProps) {
                 value={logoUrl}
                 onChange={setLogoUrl}
                 helpText="Upload an image or paste a URL"
-              />
-
-              <div className="space-y-2">
-                <Label htmlFor="display_order">Display Order</Label>
-                <Input
-                  id="display_order"
-                  name="display_order"
-                  type="number"
-                  value={displayOrder}
-                  onChange={(e) => setDisplayOrder(parseInt(e.target.value, 10))}
-                  min={0}
-                />
-                <p className="text-xs text-gray-500">
-                  Lower numbers appear first
-                </p>
-              </div>
-            </CardContent>
+               />
+             </CardContent>
           </Card>
         </TabsContent>
 
