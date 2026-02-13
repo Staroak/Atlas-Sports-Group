@@ -6,15 +6,16 @@ import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
 import { Textarea } from '@/app/components/ui/textarea'
 import { Switch } from '@/app/components/ui/switch'
+import { Badge } from '@/app/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/app/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/app/components/ui/tabs'
 import { ArrayFieldEditor } from '../components/ArrayFieldEditor'
 import { ImageUpload } from '../components/ImageUpload'
 import { createProgram, updateProgram, type ProgramFormState } from '@/app/lib/actions/programs'
 import type { Program } from '@/app/lib/types/database'
-import { ProgramCard } from '@/app/components/ProgramCard'
 import { ArrowLeft, Save, AlertCircle, Eye } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface ProgramFormProps {
   program?: Program
@@ -140,7 +141,7 @@ export function ProgramForm({ program }: ProgramFormProps) {
 
   return (
     <>
-    <form action={formAction} onSubmit={handleSubmit} className="pb-80">
+    <form action={formAction} onSubmit={handleSubmit}>
       <div className="flex items-center gap-4 mb-6">
         <Link href="/admin/programs">
           <Button type="button" variant="ghost" size="sm">
@@ -418,29 +419,101 @@ export function ProgramForm({ program }: ProgramFormProps) {
       </Tabs>
     </form>
 
-    {/* Sticky Preview Bar */}
-    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
-      <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-start gap-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-neutral-500 pt-2 shrink-0">
-            <Eye className="h-4 w-4" />
-            Preview
-          </div>
-          <div className="w-80 shrink-0">
-            <div className="transform scale-[0.65] origin-top-left w-[490px]">
-              <ProgramCard
-                name={name}
-                slug={slug || 'preview'}
-                tagline={tagline}
-                logo={logoUrl}
-                youthAges={youthAges}
-                adultAges={adultAges}
-                schedule={schedule}
-                hideActions
-              />
+    {/* Preview Section */}
+    <div className="mt-8 mb-12">
+      <div className="flex items-center gap-2 text-sm font-medium text-neutral-500 mb-4">
+        <Eye className="h-4 w-4" />
+        Registration Page Preview
+      </div>
+      <div className="pointer-events-none">
+        <Card className="overflow-hidden shadow-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-3">
+            {/* Left 2/3: Program Info */}
+            <div className="lg:col-span-2 p-8">
+              <div className="flex items-start gap-6 mb-6">
+                {/* Logo */}
+                <div className="relative w-24 h-24 md:w-32 md:h-32 bg-gray-50 rounded-xl flex-shrink-0 overflow-hidden">
+                  {logoUrl && (
+                    <Image
+                      src={logoUrl}
+                      alt={name || 'Program logo'}
+                      fill
+                      className="object-contain p-2"
+                    />
+                  )}
+                </div>
+                {/* Title & Badges */}
+                <div>
+                  <h3 className="text-2xl md:text-3xl font-bold text-atlas-navy mb-2">
+                    {name || 'Program Name'}
+                  </h3>
+                  <p className="text-base text-gray-500 mb-3">
+                    {tagline || 'Program tagline'}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {youthAges && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-700 border-blue-200">
+                        {youthAges}
+                      </Badge>
+                    )}
+                    {adultAges && (
+                      <Badge variant="secondary" className="bg-green-100 text-green-700 border-green-200">
+                        {adultAges}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {description && (
+                <p className="text-gray-600 mb-6">{description}</p>
+              )}
+
+              {/* Features Grid */}
+              {features.length > 0 && (
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  {features.map((feature, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                      <span className="text-sm text-gray-600">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Schedule */}
+              {schedule && (
+                <div className="bg-blue-50 rounded-lg p-4 mb-6">
+                  <p className="text-sm font-medium text-atlas-navy mb-1">Schedule</p>
+                  <p className="text-sm text-gray-600">{schedule}</p>
+                </div>
+              )}
+
+              <span className="text-blue-600 text-sm font-medium inline-flex items-center gap-1">
+                Learn more about this program
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
+
+            {/* Right 1/3: Registration Sidebar */}
+            <div className="lg:col-span-1 bg-gradient-to-b from-gray-50 to-gray-100 p-8 flex flex-col justify-center items-center text-center border-t lg:border-t-0 lg:border-l">
+              <h4 className="text-xl font-bold text-atlas-navy mb-4">
+                Register for {(name || 'Program').split(' ')[0]}
+              </h4>
+              <p className="text-gray-600 mb-6 text-sm">
+                Spots are limited! Secure your place today.
+              </p>
+              <span className="inline-flex items-center justify-center w-full mb-4 rounded-md bg-green-500 text-white font-semibold py-3 px-6 text-lg">
+                Register Now
+              </span>
+              <p className="text-xs text-gray-500">
+                Registration open
+              </p>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
     </>

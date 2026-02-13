@@ -22,6 +22,7 @@ interface Program {
   schedule: string;
   registrationOpen?: boolean;
   registrationMessage?: string;
+  registrationUrl?: string;
 }
 
 interface RegistrationContentProps {
@@ -196,8 +197,14 @@ export function RegistrationContent({ programs }: RegistrationContentProps) {
                             <p className="text-gray-600 mb-6 text-sm">
                               Spots are limited! Secure your place today.
                             </p>
-                            <Button variant="cta" size="xl" className="w-full mb-4">
-                              Register Now
+                            <Button asChild variant="cta" size="xl" className="w-full mb-4">
+                              <a
+                                href={program.registrationUrl || 'https://google.ca'}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Register Now
+                              </a>
                             </Button>
                             <p className="text-xs text-gray-500">
                               Early bird pricing available until Feb 15

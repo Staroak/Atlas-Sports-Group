@@ -1,0 +1,28 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e4]:
+      - link "Atlas Sports Group" [ref=e43] [cursor=pointer]:
+        - /url: /
+        - img "Atlas Sports Group" [ref=e6]
+      - button "Toggle menu" [ref=e44]:
+        - img [ref=e45]
+  - main [ref=e15]:
+    - generic [ref=e17]:
+      - generic:
+        - generic:
+          - img
+        - generic:
+          - img
+      - generic [ref=e24]:
+        - img "Atlas Sports Group" [ref=e27]
+        - generic [ref=e28]:
+          - heading "Atlas Sports Group" [level=1] [ref=e29]
+          - paragraph [ref=e30]: Building Healthy Habits Through Sport
+        - generic [ref=e31]:
+          - link "Explore Programs" [ref=e32] [cursor=pointer]:
+            - /url: /programs
+          - link "New Updates" [ref=e33] [cursor=pointer]:
+            - /url: /updates
+  - button "Open Next.js Dev Tools" [ref=e39] [cursor=pointer]:
+    - img [ref=e40]
+  - alert [ref=e47]
