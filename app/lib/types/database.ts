@@ -25,11 +25,12 @@ export interface Database {
           what_to_bring: string[]
           schedule: string | null
           display_order: number
-          is_published: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
+           is_published: boolean
+           created_at: string
+           updated_at: string
+           registration_url: string | null
+         }
+         Insert: {
           id?: string
           name: string
           slug: string
@@ -43,12 +44,13 @@ export interface Database {
           what_youll_learn?: string[]
           what_to_bring?: string[]
           schedule?: string | null
-          display_order?: number
-          is_published?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
+           display_order?: number
+           is_published?: boolean
+           created_at?: string
+           updated_at?: string
+           registration_url?: string | null
+         }
+         Update: {
           id?: string
           name?: string
           slug?: string
@@ -62,13 +64,14 @@ export interface Database {
           what_youll_learn?: string[]
           what_to_bring?: string[]
           schedule?: string | null
-          display_order?: number
-          is_published?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      events: {
+           display_order?: number
+           is_published?: boolean
+           created_at?: string
+           updated_at?: string
+           registration_url?: string | null
+         }
+       }
+       events: {
         Row: {
           id: string
           title: string

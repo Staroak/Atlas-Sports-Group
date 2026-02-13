@@ -60,17 +60,18 @@ export default async function ProgramsPage() {
                 </div>
               ) : (
                 programs.map((program) => (
-                  <ProgramCard
-                    key={program.id}
-                    name={program.name}
-                    slug={program.slug}
-                    tagline={program.tagline}
-                    logo={program.logo}
-                    youthAges={program.youthAges}
-                    adultAges={program.adultAges}
-                    schedule={program.schedule}
-                  />
-                ))
+                   <ProgramCard
+                     key={program.id}
+                     name={program.name}
+                     slug={program.slug}
+                     tagline={program.tagline}
+                     logo={program.logo}
+                     youthAges={program.youthAges}
+                     adultAges={program.adultAges}
+                     schedule={program.schedule}
+                     registrationUrl={program.registrationUrl}
+                   />
+                 ))
               )}
             </div>
 

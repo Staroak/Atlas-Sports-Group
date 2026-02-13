@@ -20,6 +20,7 @@ function dbProgramToLegacy(program: Program) {
     schedule: program.schedule || '',
     registrationOpen: (program as any).registration_open || false,
     registrationMessage: (program as any).registration_message || '',
+    registrationUrl: (program as any).registration_url || 'https://google.ca',
   }
 }
 

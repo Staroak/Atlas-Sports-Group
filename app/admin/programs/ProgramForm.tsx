@@ -47,10 +47,11 @@ export function ProgramForm({ program }: ProgramFormProps) {
   const [isPublished, setIsPublished] = useState(program?.is_published || false)
   const [features, setFeatures] = useState<string[]>(Array.isArray(program?.features) ? program.features.filter(Boolean) : [])
   const [benefits, setBenefits] = useState<string[]>(Array.isArray(program?.benefits) ? program.benefits.filter(Boolean) : [])
-  const [whatYoullLearn, setWhatYoullLearn] = useState<string[]>(Array.isArray(program?.what_youll_learn) ? program.what_youll_learn.filter(Boolean) : [])
-  const [whatToBring, setWhatToBring] = useState<string[]>(Array.isArray(program?.what_to_bring) ? program.what_to_bring.filter(Boolean) : [])
+   const [whatYoullLearn, setWhatYoullLearn] = useState<string[]>(Array.isArray(program?.what_youll_learn) ? program.what_youll_learn.filter(Boolean) : [])
+   const [whatToBring, setWhatToBring] = useState<string[]>(Array.isArray(program?.what_to_bring) ? program.what_to_bring.filter(Boolean) : [])
+   const [registrationUrl, setRegistrationUrl] = useState(program?.registration_url || 'https://google.ca')
 
-  // Validation state
+   // Validation state
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
   const [touched, setTouched] = useState<Record<string, boolean>>({})
   const [showAllErrors, setShowAllErrors] = useState(false)
@@ -204,9 +205,10 @@ export function ProgramForm({ program }: ProgramFormProps) {
       <input type="hidden" name="features" value={JSON.stringify(features)} />
       <input type="hidden" name="benefits" value={JSON.stringify(benefits)} />
       <input type="hidden" name="what_youll_learn" value={JSON.stringify(whatYoullLearn)} />
-      <input type="hidden" name="what_to_bring" value={JSON.stringify(whatToBring)} />
+       <input type="hidden" name="what_to_bring" value={JSON.stringify(whatToBring)} />
+       <input type="hidden" name="registration_url" value={registrationUrl} />
 
-      <Tabs defaultValue="basic" className="space-y-6">
+       <Tabs defaultValue="basic" className="space-y-6">
         <TabsList>
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
@@ -320,18 +322,33 @@ export function ProgramForm({ program }: ProgramFormProps) {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="schedule">Schedule</Label>
-                <Textarea
-                  id="schedule"
-                  name="schedule"
-                  value={schedule}
-                  onChange={(e) => setSchedule(e.target.value)}
-                  rows={2}
-                  placeholder="e.g., Weekly sessions, Spring (Apr-Jun), Summer (Jul-Aug), Fall (Sept-Dec)"
-                />
-              </div>
-             </CardContent>
+               <div className="space-y-2">
+                 <Label htmlFor="schedule">Schedule</Label>
+                 <Textarea
+                   id="schedule"
+                   name="schedule"
+                   value={schedule}
+                   onChange={(e) => setSchedule(e.target.value)}
+                   rows={2}
+                   placeholder="e.g., Weekly sessions, Spring (Apr-Jun), Summer (Jul-Aug), Fall (Sept-Dec)"
+                 />
+               </div>
+
+               <div className="space-y-2">
+                 <Label htmlFor="registration_url">Registration URL</Label>
+                 <Input
+                   id="registration_url"
+                   name="registration_url_display"
+                   type="url"
+                   value={registrationUrl}
+                   onChange={(e) => setRegistrationUrl(e.target.value)}
+                   placeholder="https://example.com/register"
+                 />
+                 <p className="text-xs text-gray-500">
+                   Where the &quot;Register Now&quot; button links to. Default: https://google.ca
+                 </p>
+               </div>
+              </CardContent>
           </Card>
         </TabsContent>
 

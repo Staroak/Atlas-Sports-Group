@@ -18,6 +18,7 @@ export interface ProgramCardProps {
   youthAges?: string
   adultAges?: string
   schedule?: string
+  registrationUrl?: string
   /** Hide action buttons (used in preview contexts) */
   hideActions?: boolean
 }
@@ -30,6 +31,7 @@ export function ProgramCard({
   youthAges,
   adultAges,
   schedule,
+  registrationUrl,
   hideActions = false,
 }: ProgramCardProps) {
   return (
@@ -89,12 +91,14 @@ export function ProgramCard({
           >
             Learn More
           </Link>
-          <Link
-            href={`/registration#${slug}`}
-            className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all h-9 px-4 py-2 bg-green-500 text-white hover:bg-green-600 hover:scale-105 hover:shadow-xl w-full sm:w-auto cursor-pointer"
-          >
-            Register
-          </Link>
+           <Link
+             href={registrationUrl || `/registration#${slug}`}
+             target={registrationUrl ? "_blank" : undefined}
+             rel={registrationUrl ? "noopener noreferrer" : undefined}
+             className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all h-9 px-4 py-2 bg-green-500 text-white hover:bg-green-600 hover:scale-105 hover:shadow-xl w-full sm:w-auto cursor-pointer"
+           >
+             Register
+           </Link>
         </CardFooter>
       )}
     </Card>

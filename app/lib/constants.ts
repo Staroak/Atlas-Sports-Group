@@ -34,6 +34,7 @@ export interface Program {
   whatYoullLearn: string[];
   schedule: string;
   whatToBring: string[];
+  registrationUrl?: string;
 }
 
 export const PROGRAMS: Program[] = [

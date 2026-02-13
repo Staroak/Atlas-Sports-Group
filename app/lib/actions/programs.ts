@@ -27,9 +27,10 @@ const ProgramSchema = z.object({
   benefits: cleanStringArray,
   what_youll_learn: cleanStringArray,
   what_to_bring: cleanStringArray,
-  schedule: z.string().optional().nullable(),
-  display_order: z.number().default(0),
-  is_published: z.boolean().default(false),
+   schedule: z.string().optional().nullable(),
+   display_order: z.number().default(0),
+   is_published: z.boolean().default(false),
+   registration_url: z.string().optional().nullable(),
 })
 
 export type ProgramFormState = {
@@ -66,10 +67,11 @@ export async function createProgram(
       benefits: parseJsonArray(formData.get('benefits')),
       what_youll_learn: parseJsonArray(formData.get('what_youll_learn')),
       what_to_bring: parseJsonArray(formData.get('what_to_bring')),
-      schedule: formData.get('schedule') as string || null,
-      display_order: parseInt(formData.get('display_order') as string || '0', 10),
-      is_published: formData.get('is_published') === 'true',
-    }
+       schedule: formData.get('schedule') as string || null,
+       display_order: parseInt(formData.get('display_order') as string || '0', 10),
+       is_published: formData.get('is_published') === 'true',
+       registration_url: formData.get('registration_url') as string || null,
+     }
 
     const validated = ProgramSchema.parse(rawData)
 
@@ -124,11 +126,12 @@ export async function updateProgram(
       benefits: parseJsonArray(formData.get('benefits')),
       what_youll_learn: parseJsonArray(formData.get('what_youll_learn')),
       what_to_bring: parseJsonArray(formData.get('what_to_bring')),
-      schedule: formData.get('schedule') as string || null,
-      display_order: parseInt(formData.get('display_order') as string || '0', 10),
-      is_published: formData.get('is_published') === 'true',
-      updated_at: new Date().toISOString(),
-    }
+       schedule: formData.get('schedule') as string || null,
+       display_order: parseInt(formData.get('display_order') as string || '0', 10),
+       is_published: formData.get('is_published') === 'true',
+       registration_url: formData.get('registration_url') as string || null,
+       updated_at: new Date().toISOString(),
+     }
 
     const validated = ProgramSchema.parse(rawData)
 

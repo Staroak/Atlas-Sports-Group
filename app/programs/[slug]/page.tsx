@@ -59,14 +59,20 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
               <p className="text-lg text-white/80 mb-8">
                 {program.description}
               </p>
-              <div className="flex flex-wrap gap-4">
-                <Button asChild variant="cta" size="xl">
-                  <Link href={`/registration#${program.slug}`}>Register Now</Link>
-                </Button>
-                <Button asChild variant="outline" size="xl" className="bg-white text-black border-white hover:bg-white/90">
-                  <Link href="/programs">View All Programs</Link>
-                </Button>
-              </div>
+               <div className="flex flex-wrap gap-4">
+                 <Button asChild variant="cta" size="xl">
+                   <Link 
+                     href={program.registrationUrl || `/registration#${program.slug}`}
+                     target={program.registrationUrl ? "_blank" : undefined}
+                     rel={program.registrationUrl ? "noopener noreferrer" : undefined}
+                   >
+                     Register Now
+                   </Link>
+                 </Button>
+                 <Button asChild variant="outline" size="xl" className="bg-white text-black border-white hover:bg-white/90">
+                   <Link href="/programs">View All Programs</Link>
+                 </Button>
+               </div>
             </div>
 
             {/* Logo */}
@@ -185,9 +191,15 @@ export default async function ProgramPage({ params }: ProgramPageProps) {
             <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
               Join {program.name} and start building healthy habits through sport!
             </p>
-            <Button asChild variant="outline" size="xl" className="bg-white text-blue-600 hover:bg-white/90 border-white">
-              <Link href={`/registration#${program.slug}`}>Register Now</Link>
-            </Button>
+             <Button asChild variant="outline" size="xl" className="bg-white text-blue-600 hover:bg-white/90 border-white">
+               <Link 
+                 href={program.registrationUrl || `/registration#${program.slug}`}
+                 target={program.registrationUrl ? "_blank" : undefined}
+                 rel={program.registrationUrl ? "noopener noreferrer" : undefined}
+               >
+                 Register Now
+               </Link>
+             </Button>
           </div>
         </Container>
       </section>
