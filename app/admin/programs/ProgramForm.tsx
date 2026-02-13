@@ -12,7 +12,8 @@ import { ArrayFieldEditor } from '../components/ArrayFieldEditor'
 import { ImageUpload } from '../components/ImageUpload'
 import { createProgram, updateProgram, type ProgramFormState } from '@/app/lib/actions/programs'
 import type { Program } from '@/app/lib/types/database'
-import { ArrowLeft, Save, AlertCircle } from 'lucide-react'
+import { ProgramCard } from '@/app/components/ProgramCard'
+import { ArrowLeft, Save, AlertCircle, Eye } from 'lucide-react'
 import Link from 'next/link'
 
 interface ProgramFormProps {
@@ -137,7 +138,8 @@ export function ProgramForm({ program }: ProgramFormProps) {
   }
 
   return (
-    <form action={formAction} onSubmit={handleSubmit}>
+    <>
+    <form action={formAction} onSubmit={handleSubmit} className="pb-80">
       <div className="flex items-center gap-4 mb-6">
         <Link href="/admin/programs">
           <Button type="button" variant="ghost" size="sm">
@@ -398,5 +400,32 @@ export function ProgramForm({ program }: ProgramFormProps) {
         </TabsContent>
       </Tabs>
     </form>
+
+    {/* Sticky Preview Bar */}
+    <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-white/95 backdrop-blur-sm shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+      <div className="max-w-7xl mx-auto px-4 py-4">
+        <div className="flex items-start gap-4">
+          <div className="flex items-center gap-2 text-sm font-medium text-neutral-500 pt-2 shrink-0">
+            <Eye className="h-4 w-4" />
+            Preview
+          </div>
+          <div className="w-80 shrink-0">
+            <div className="transform scale-[0.65] origin-top-left w-[490px]">
+              <ProgramCard
+                name={name}
+                slug={slug || 'preview'}
+                tagline={tagline}
+                logo={logoUrl}
+                youthAges={youthAges}
+                adultAges={adultAges}
+                schedule={schedule}
+                hideActions
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </>
   )
 }
