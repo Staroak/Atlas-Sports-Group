@@ -40,6 +40,14 @@ export default function Header() {
               </Link>
             ))}
 
+            {/* Login Link */}
+            <Link
+              href="/admin/login"
+              className="text-neutral-500 hover:text-neutral-700 text-sm transition-colors"
+            >
+              Login
+            </Link>
+
             {/* CTA Button */}
             <Button asChild variant="cta" size="sm">
               <Link href="/registration">Register Now</Link>
@@ -99,6 +107,15 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
+
+              {/* Mobile Login Link */}
+              <Link
+                href="/admin/login"
+                className="text-neutral-500 hover:text-neutral-700 text-sm transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
 
               {/* Mobile CTA Button */}
               <Button asChild variant="cta" className="w-full">
