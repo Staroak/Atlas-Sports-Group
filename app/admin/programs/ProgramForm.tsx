@@ -207,7 +207,6 @@ export function ProgramForm({ program }: ProgramFormProps) {
       <Tabs defaultValue="basic" className="space-y-6">
         <TabsList>
           <TabsTrigger value="basic">Basic Info</TabsTrigger>
-          <TabsTrigger value="ages">Ages & Schedule</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
         </TabsList>
 
@@ -295,16 +294,7 @@ export function ProgramForm({ program }: ProgramFormProps) {
                 onChange={setLogoUrl}
                 helpText="Upload an image or paste a URL"
                />
-             </CardContent>
-          </Card>
-        </TabsContent>
 
-        <TabsContent value="ages">
-          <Card>
-            <CardHeader>
-              <CardTitle>Ages & Schedule</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="youth_ages">Youth Ages</Label>
@@ -339,7 +329,7 @@ export function ProgramForm({ program }: ProgramFormProps) {
                   placeholder="e.g., Weekly sessions, Spring (Apr-Jun), Summer (Jul-Aug), Fall (Sept-Dec)"
                 />
               </div>
-            </CardContent>
+             </CardContent>
           </Card>
         </TabsContent>
 
