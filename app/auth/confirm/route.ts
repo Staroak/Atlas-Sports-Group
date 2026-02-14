@@ -1,4 +1,4 @@
-import { createClient } from '@/app/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { type EmailOtpType } from '@supabase/supabase-js'
 
@@ -13,8 +13,33 @@ export async function GET(request: NextRequest) {
     )
   }
 
+  // Determine redirect destination before creating response
+  const redirectTo = type === 'invite' ? '/admin/set-password' : '/admin/programs'
+
   try {
-    const supabase = await createClient()
+    // Route Handlers need cookies written to the NextResponse directly.
+    // The shared createClient() uses next/headers cookies() which is
+    // read-only here — session cookies silently fail to persist.
+    const redirectUrl = new URL(redirectTo, request.url)
+    const response = NextResponse.redirect(redirectUrl)
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
     const { error } = await supabase.auth.verifyOtp({ token_hash, type })
 
     if (error) {
@@ -24,13 +49,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Invite users need to set their password
-    if (type === 'invite') {
-      return NextResponse.redirect(new URL('/admin/set-password', request.url))
-    }
-
-    // All other types go to admin dashboard
-    return NextResponse.redirect(new URL('/admin/programs', request.url))
+    return response
   } catch (err) {
     console.error('Auth confirm unexpected error:', err)
     return NextResponse.redirect(

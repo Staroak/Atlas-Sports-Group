@@ -1,4 +1,4 @@
-import { createClient } from '@/app/lib/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -12,7 +12,26 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
+    const redirectUrl = new URL('/admin/set-password', request.url)
+    const response = NextResponse.redirect(redirectUrl)
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              response.cookies.set(name, value, options)
+            )
+          },
+        },
+      }
+    )
+
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
     if (error) {
@@ -22,8 +41,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Successful token exchange — redirect to set password page
-    return NextResponse.redirect(new URL('/admin/set-password', request.url))
+    return response
   } catch (err) {
     console.error('Auth callback unexpected error:', err)
     return NextResponse.redirect(
