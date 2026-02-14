@@ -62,8 +62,8 @@ export default function SetPasswordPage() {
         return
       }
 
-      router.push('/admin/programs')
-      router.refresh()
+      // Hard navigate — auth state changed, need full reload for middleware to pick up new session
+      window.location.href = '/admin/programs'
     } catch {
       setError('An unexpected error occurred')
       setLoading(false)

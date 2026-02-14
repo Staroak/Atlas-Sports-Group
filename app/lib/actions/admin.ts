@@ -44,15 +44,12 @@ export async function clearMustChangePassword() {
     return { error: 'Not authenticated' }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error: updateError } = await (supabase
-    .from('admin_users') as any)
-    .update({ must_change_password: false })
-    .eq('user_id', user.id)
+  // Uses SECURITY DEFINER function to bypass RLS on admin_users
+  const { error: rpcError } = await supabase.rpc('clear_must_change_password')
 
-  if (updateError) {
-    console.error('Failed to clear must_change_password:', updateError.message)
-    return { error: updateError.message }
+  if (rpcError) {
+    console.error('Failed to clear must_change_password:', rpcError.message)
+    return { error: rpcError.message }
   }
 
   return { success: true }
