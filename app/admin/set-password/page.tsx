@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/app/lib/supabase/client'
-import { createAdminUser } from '@/app/lib/actions/admin'
+import { createAdminUser, clearMustChangePassword } from '@/app/lib/actions/admin'
 import { Button } from '@/app/components/ui/button'
 import { Input } from '@/app/components/ui/input'
 import { Label } from '@/app/components/ui/label'
@@ -47,11 +47,17 @@ export default function SetPasswordPage() {
         return
       }
 
-      // Create admin_users row via server action
-      const result = await createAdminUser()
+      // Create admin_users row if needed (invite flow) and clear password flag
+      const createResult = await createAdminUser()
+      if (createResult.error) {
+        setError(createResult.error)
+        setLoading(false)
+        return
+      }
 
-      if (result.error) {
-        setError(result.error)
+      const clearResult = await clearMustChangePassword()
+      if (clearResult.error) {
+        setError(clearResult.error)
         setLoading(false)
         return
       }

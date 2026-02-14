@@ -175,16 +175,19 @@ export interface Database {
         Row: {
           user_id: string
           role: string
+          must_change_password: boolean
           created_at: string
         }
         Insert: {
           user_id: string
           role?: string
+          must_change_password?: boolean
           created_at?: string
         }
         Update: {
           user_id?: string
           role?: string
+          must_change_password?: boolean
           created_at?: string
         }
       }

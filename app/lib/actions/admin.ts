@@ -34,3 +34,26 @@ export async function createAdminUser() {
 
   return { success: true }
 }
+
+export async function clearMustChangePassword() {
+  const supabase = await createClient()
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+    return { error: 'Not authenticated' }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error: updateError } = await (supabase
+    .from('admin_users') as any)
+    .update({ must_change_password: false })
+    .eq('user_id', user.id)
+
+  if (updateError) {
+    console.error('Failed to clear must_change_password:', updateError.message)
+    return { error: updateError.message }
+  }
+
+  return { success: true }
+}

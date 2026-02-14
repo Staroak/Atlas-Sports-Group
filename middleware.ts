@@ -67,7 +67,7 @@ export async function middleware(request: NextRequest) {
       // Check if user is admin
       const { data: adminUser } = await supabase
         .from('admin_users')
-        .select('role')
+        .select('role, must_change_password')
         .eq('user_id', user.id)
         .single()
 
@@ -75,6 +75,11 @@ export async function middleware(request: NextRequest) {
         // Not an admin, sign out and redirect to home
         await supabase.auth.signOut()
         return NextResponse.redirect(new URL('/', request.url))
+      }
+
+      // Force password change if required
+      if (adminUser.must_change_password && request.nextUrl.pathname !== '/admin/set-password') {
+        return NextResponse.redirect(new URL('/admin/set-password', request.url))
       }
     }
 
